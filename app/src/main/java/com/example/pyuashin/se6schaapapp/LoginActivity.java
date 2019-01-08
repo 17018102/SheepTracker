@@ -18,13 +18,21 @@ public class LoginActivity extends AppCompatActivity {
         final EditText etUsername = (EditText) findViewById(R.id.etUsername);
         final EditText etPassword = (EditText) findViewById(R.id.etPassword);
         final Button btLogin = (Button) findViewById(R.id.btLogin);
-        final TextView registerLink = (TextView) findViewById(R.id.tvRegister);
+        final TextView registerLink = (TextView) findViewById(R.id.tvRegisterHere);
 
         registerLink.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent registerIntent = new Intent(LoginActivity.this, RegisterActivity.class);
                 LoginActivity.this.startActivity(registerIntent);
+            }
+        });
+
+        btLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent LoginIntent = new Intent(LoginActivity.this, UserAreaActivity.class);
+                LoginActivity.this.startActivity(LoginIntent);
             }
         });
     }
