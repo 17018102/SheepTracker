@@ -52,19 +52,17 @@ public class LoginActivity extends AppCompatActivity {
                             //Forward the user to the UserArea page if the log in was successful
                             if(success){
                                 String name = jsonResponse.getString("name");
-                                String username = jsonResponse.getString("username");
 
                                 //sent the data below over to the new page the user is being redirected to
                                 Intent intent = new Intent(LoginActivity.this, UserAreaActivity.class);
                                 intent.putExtra("name", name);
-                                intent.putExtra("username", username);
                                 //redirect the user to the UserArea page
-                                LoginActivity.this.startActivity(intent);
+                                startActivity(intent);
                             }else{
                                 //Shows the user a message telling them their log in attempt failed and allows them to retry
                                 AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
                                 builder.setMessage("Login Failed")
-                                        .setNegativeButton("Retry", null)
+                                        .setNegativeButton("Retry",     null)
                                         .create()
                                         .show();
                             }
@@ -73,7 +71,6 @@ public class LoginActivity extends AppCompatActivity {
                         }
                     }
                 };
-
                 LoginRequest loginRequest = new LoginRequest(username, password, responseListener);
                 RequestQueue queue = Volley.newRequestQueue(LoginActivity.this);
                 queue.add(loginRequest);

@@ -12,7 +12,9 @@ public class RegisterRequest extends StringRequest {
     private Map<String, String> params;
 
     public RegisterRequest(String name, String username, String password, Response.Listener<String> listener){
+        //Fetch data from the database
         super(Method.POST, REGISTER_REQUEST_URL, listener, null);
+
         params = new HashMap<>();
         params.put("name", name);
         params.put("username", username);
