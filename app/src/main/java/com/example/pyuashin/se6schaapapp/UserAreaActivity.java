@@ -1,6 +1,7 @@
 package com.example.pyuashin.se6schaapapp;
 
 import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -45,23 +46,36 @@ public class UserAreaActivity extends AppCompatActivity {
                     public void onResponse(String response) {
                         try {
                             JSONObject jsonResponse = new JSONObject(response);
-                            //boolean success = jsonResponse.getBoolean("success");
-                            boolean on_feet_status = jsonResponse.getBoolean("on_feet_status");
+                            boolean success = jsonResponse.getBoolean("success");
 
-                            int device_id = Integer.parseInt(jsonResponse.getString("device_id"));
-                            int device_user_id = Integer.parseInt(jsonResponse.getString("device_user_id"));
+                            //Forward the user to the device overview page with the retrieved device data
+                            //Check if data was successfully retrieved
+                            if (success) {
+                                boolean on_feet_status = jsonResponse.getBoolean("on_feet_status");
 
-                            String coordinates = jsonResponse.getString("location");
-                            String user_name = jsonResponse.getString("user_name");
+                                int device_id = Integer.parseInt(jsonResponse.getString("device_id"));
+                                int device_user_id = Integer.parseInt(jsonResponse.getString("device_user_id"));
 
-                            Intent intent = new Intent(UserAreaActivity.this, DeviceOverviewActivity.class);
-                            /*intent.putExtra("on_feet_status", on_feet_status);
-                            intent.putExtra("device_id", device_id);
-                            intent.putExtra("device_user_id", user_name);
-                            intent.putExtra("coordinates", coordinates);
-                            intent.putExtra("user_name", user_name);*/
+                                String coordinates = jsonResponse.getString("location");
+                                String user_name = jsonResponse.getString("user_name");
 
-                            UserAreaActivity.this.startActivity(intent);
+                                Intent NewAcvitity = new Intent(UserAreaActivity.this, DeviceOverviewActivity.class);
+                                NewAcvitity.putExtra("on_feet_status", on_feet_status);
+                                NewAcvitity.putExtra("device_id", device_id);
+                                NewAcvitity.putExtra("device_user_id", user_name);
+                                NewAcvitity.putExtra("coordinates", coordinates);
+                                NewAcvitity.putExtra("device_user_id", device_user_id);
+                                NewAcvitity.putExtra("user_name", user_name);
+
+                                UserAreaActivity.this.startActivity(NewAcvitity);
+                            } else {
+                                //Shows the user a message telling them their log in attempt failed and allows them to retry
+                                AlertDialog.Builder builder = new AlertDialog.Builder(UserAreaActivity.this);
+                                builder.setMessage("Device data couldn't be retrieved")
+                                        .setNegativeButton("OK", null)
+                                        .create()
+                                        .show();
+                            }
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -72,41 +86,5 @@ public class UserAreaActivity extends AppCompatActivity {
                 queue.add(deviceDataRequest);
             }
         });
-
-        /*btDeviceOverview.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Response.Listener<String> responseListener = new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            JSONObject jsonResponse = new JSONObject(response);
-                            //boolean success = jsonResponse.getBoolean("success");
-                            boolean on_feet_status = jsonResponse.getBoolean("on_feet_status");
-
-                            int device_id = Integer.parseInt(jsonResponse.getString("device_id"));
-                            int device_user_id = Integer.parseInt(jsonResponse.getString("device_user_id"));
-
-                            String coordinates = jsonResponse.getString("location");
-                            String user_name = jsonResponse.getString("user_name");
-
-                            Intent intent = new Intent(UserAreaActivity.this, DeviceOverviewActivity.class);
-                            intent.putExtra("on_feet_status", on_feet_status);
-                            intent.putExtra("device_id", device_id);
-                            intent.putExtra("device_user_id", user_name);
-                            intent.putExtra("coordinates", coordinates);
-                            intent.putExtra("user_name", user_name);
-
-                            UserAreaActivity.this.startActivity(intent);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                };
-                DeviceDataRequest deviceDataRequest = new DeviceDataRequest(responseListener);
-                RequestQueue queue = Volley.newRequestQueue(UserAreaActivity.this);
-                queue.add(deviceDataRequest);
-            }
-        }); */
     }
 }

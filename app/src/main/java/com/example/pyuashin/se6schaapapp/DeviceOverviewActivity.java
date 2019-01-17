@@ -29,7 +29,7 @@ public class DeviceOverviewActivity extends AppCompatActivity {
 
 
         tvDevice_ID.setText("Current device ID: " + device_id);
-        tvUser_name.setText("This device is owned by: " + device_user_id);
+        tvUser_name.setText("This device is owned by: " + user_name + " and their ID is: " + device_user_id);
         tvCoordinates.setText("The current coordinates of the device are: " + coordinates);
 
         if(on_feet_status){

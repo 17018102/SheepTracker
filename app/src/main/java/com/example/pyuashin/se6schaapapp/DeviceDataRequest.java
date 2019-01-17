@@ -15,19 +15,4 @@ public class DeviceDataRequest extends StringRequest {
         //Fetch data from the database
         super(Method.POST, DEVICE_DATA_REQUEST_URL, listener, null);
     }
-
-    /*public DeviceDataRequest(String device_id, String location, String on_feet_status, String device_user_id, String user_name, Response.Listener<String> listener){
-        super(Request.Method.POST, DEVICE_DATA_REQUEST_URL, listener, null);
-        params = new HashMap<>();
-        params.put("device_id", device_id);
-        params.put("location", location);
-        params.put("on_feet_status", on_feet_status);
-        params.put("device_user_id", device_user_id);
-        params.put("user_name", user_name);
-    }
-
-    @Override
-    public Map<String, String> getParams() {
-        return params;
-    }*/
 }
