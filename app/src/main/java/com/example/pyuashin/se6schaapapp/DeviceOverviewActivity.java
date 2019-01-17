@@ -42,7 +42,6 @@ public class DeviceOverviewActivity extends AppCompatActivity {
         String coordinates = getIntent().getExtras().getString("coordinates");
         String user_name = getIntent().getExtras().getString("user_name");
 
-
         tvDevice_ID.setText("Current device ID: " + device_id);
         tvUser_name.setText("This device is owned by: " + user_name + " and their ID is: " + device_user_id);
         tvCoordinates.setText("The current coordinates of the device are: " + coordinates);
@@ -59,7 +58,7 @@ public class DeviceOverviewActivity extends AppCompatActivity {
         sendNotification();
     }
 
-    //Need to create a channel before notification work on API26+
+    //Creates a channel for the notifications to work on API26+
     private void createNotificationChannel(){
         final String NOTIFICATION_CHANNEL_ID = getString(R.string.default_notification_channel_id);
         final String NOTIFICATION_CHANNEL_NAME= "Sheep";
@@ -73,16 +72,18 @@ public class DeviceOverviewActivity extends AppCompatActivity {
 
         NotificationManager notificationManager = getSystemService(NotificationManager.class);
         notificationManager.createNotificationChannel(notificationChannelTest);
-
     }
 
+    //builds and issues the notification
     public void sendNotification(){
-        Intent intent = new Intent(this, UserAreaActivity.class);
+        Intent intent = new Intent(this, UserAreaActivity.class);//declare what activity the user will be send to when clicking on the notification
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT); //Give the phone access to the intent
 
+        //Set notification sound
         Uri sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
+        //Set the notification's content
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, getString(R.string.default_notification_channel_id))
                 .setAutoCancel(true)
                 .setWhen(System.currentTimeMillis())
@@ -93,7 +94,8 @@ public class DeviceOverviewActivity extends AppCompatActivity {
                 .setSound(sound)
                 .setContentIntent(pendingIntent);
 
-        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE); //This notification manager can build and send notifications
+        //The notification manager that'll build and sent the
+        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         nm.notify(uniqueID, notificationBuilder.build());
     }
 }
