@@ -1,13 +1,28 @@
 package com.example.pyuashin.se6schaapapp;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.media.RingtoneManager;
+import android.net.Uri;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.w3c.dom.Text;
 
 public class DeviceOverviewActivity extends AppCompatActivity {
+
+    NotificationCompat.Builder sheepNotification;
+    private static final int uniqueID = 1738;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,5 +52,48 @@ public class DeviceOverviewActivity extends AppCompatActivity {
         }else{
             tvOn_Feet_Status.setText("Het schaap ligt op zijn rug");
         }
+    }
+
+    public void notificationTest(View view) {
+        createNotificationChannel();
+        sendNotification();
+    }
+
+    //Need to create a channel before notification work on API26+
+    private void createNotificationChannel(){
+        final String NOTIFICATION_CHANNEL_ID = getString(R.string.default_notification_channel_id);
+        final String NOTIFICATION_CHANNEL_NAME= "Sheep";
+        int importance = NotificationManager.IMPORTANCE_DEFAULT;
+
+        NotificationChannel notificationChannelTest = new NotificationChannel(NOTIFICATION_CHANNEL_ID, NOTIFICATION_CHANNEL_NAME, importance);
+        notificationChannelTest.enableLights(true);
+        notificationChannelTest.setLightColor(Color.RED);
+        notificationChannelTest.enableVibration(true);
+        notificationChannelTest.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
+
+        NotificationManager notificationManager = getSystemService(NotificationManager.class);
+        notificationManager.createNotificationChannel(notificationChannelTest);
+
+    }
+
+    public void sendNotification(){
+        Intent intent = new Intent(this, UserAreaActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT); //Give the phone access to the intent
+
+        Uri sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, getString(R.string.default_notification_channel_id))
+                .setAutoCancel(true)
+                .setWhen(System.currentTimeMillis())
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setTicker("Sheep has fallen (ticket)")
+                .setContentTitle("Sheep status(title)")
+                .setContentText("This is the body of the sheep notification(Text)")
+                .setSound(sound)
+                .setContentIntent(pendingIntent);
+
+        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE); //This notification manager can build and send notifications
+        nm.notify(uniqueID, notificationBuilder.build());
     }
 }
