@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -17,11 +18,16 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Text;
 
 public class DeviceOverviewActivity extends AppCompatActivity {
 
-    NotificationCompat.Builder sheepNotification;
     private static final int uniqueID = 1738;
 
     @Override
@@ -29,16 +35,15 @@ public class DeviceOverviewActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_overview);
 
-        final TextView tvDevice_ID = (TextView) findViewById(R.id.tvDevice_ID);
-        final TextView tvUser_name = (TextView) findViewById(R.id.tvUser_name);
-        final TextView tvCoordinates = (TextView) findViewById(R.id.tvCoordinates);
-        final TextView tvOn_Feet_Status = (TextView) findViewById(R.id.tvOn_Feet_Status);
+        final TextView tvDevice_ID = findViewById(R.id.tvDevice_ID);
+        final TextView tvUser_name = findViewById(R.id.tvUser_name);
+        final TextView tvCoordinates = findViewById(R.id.tvCoordinates);
+        final TextView tvOn_Feet_Status = findViewById(R.id.tvOn_Feet_Status);
+        Button testButton = findViewById(R.id.btNotification);
 
         boolean on_feet_status = getIntent().getExtras().getBoolean("on_feet_status");
-
         int device_id = getIntent().getExtras().getInt("device_id");
         int device_user_id = getIntent().getExtras().getInt("device_user_id");
-
         String coordinates = getIntent().getExtras().getString("coordinates");
         String user_name = getIntent().getExtras().getString("user_name");
 
@@ -51,11 +56,70 @@ public class DeviceOverviewActivity extends AppCompatActivity {
         }else{
             tvOn_Feet_Status.setText("Het schaap ligt op zijn rug");
         }
+        getData(testButton);
     }
 
-    public void notificationTest(View view) {
-        createNotificationChannel();
-        sendNotification();
+    //Fetches data from the database and calls the update method
+    private void getData(Button testButton){
+        testButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Response.Listener<String> responseListener = new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            JSONObject jsonResponse = new JSONObject(response);
+                            boolean success = jsonResponse.getBoolean("success");
+
+                            //Forward the user to the device overview page with the retrieved device data
+                            //Check if data was successfully retrieved
+                            if (success) {
+                                boolean on_feet_status = jsonResponse.getBoolean("on_feet_status");
+                                int device_id = Integer.parseInt(jsonResponse.getString("device_id"));
+                                int device_user_id = Integer.parseInt(jsonResponse.getString("device_user_id"));
+                                String coordinates = jsonResponse.getString("location");
+                                String user_name = jsonResponse.getString("user_name");
+
+                                onUpdate(device_id, user_name, coordinates, on_feet_status, device_user_id);
+                            } else {
+                                //Shows the user a message telling them their log in attempt failed and allows them to retry
+                                AlertDialog.Builder builder = new AlertDialog.Builder(DeviceOverviewActivity.this);
+                                builder.setMessage("Device data couldn't be retrieved")
+                                        .setNegativeButton("OK", null)
+                                        .create()
+                                        .show();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                };
+                DeviceDataRequest deviceDataRequest = new DeviceDataRequest(responseListener);
+                RequestQueue queue = Volley.newRequestQueue(DeviceOverviewActivity.this);
+                queue.add(deviceDataRequest);
+            }
+        });
+    }
+
+    //Updates the labels to their corresponding values and sends a notifcation if required
+    //(This was supposed updated automatically based on database changes but couldn't figure out how to make it work)
+    private void onUpdate(int deviceID, String user_name, String coordinates, boolean on_feet_status, int device_user_id){
+        TextView tvDevice_ID = findViewById(R.id.tvDevice_ID);
+        TextView tvUser_name = findViewById(R.id.tvUser_name);
+        TextView tvCoordinates = findViewById(R.id.tvCoordinates);
+        TextView tvOn_Feet_Status = findViewById(R.id.tvOn_Feet_Status);
+
+        tvDevice_ID.setText("Current device ID: " + deviceID);
+        tvUser_name.setText("This device is owned by: " + user_name + " and their ID is: " + device_user_id);
+        tvCoordinates.setText("The current coordinates of the device are: " + coordinates);
+
+        if(on_feet_status){
+            tvOn_Feet_Status.setText("Het schaap staat op zijn poten.");
+        }else{
+            tvOn_Feet_Status.setText("Het schaap ligt op zijn rug");
+            createNotificationChannel();
+            sendNotification();
+        }
     }
 
     //Creates a channel for the notifications to work on API26+
@@ -88,9 +152,9 @@ public class DeviceOverviewActivity extends AppCompatActivity {
                 .setAutoCancel(true)
                 .setWhen(System.currentTimeMillis())
                 .setSmallIcon(R.mipmap.ic_launcher)
-                .setTicker("Sheep has fallen (ticket)")
-                .setContentTitle("Sheep status(title)")
-                .setContentText("This is the body of the sheep notification(Text)")
+                .setTicker("Sheep has fallen (ticket)") //doesn't seem to work
+                .setContentTitle("EEN SCHAAP LIGT OP ZIJN RUN!")
+                .setContentText("Een schaap heeft Uw hulp nodig.")
                 .setSound(sound)
                 .setContentIntent(pendingIntent);
 
@@ -98,4 +162,16 @@ public class DeviceOverviewActivity extends AppCompatActivity {
         NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         nm.notify(uniqueID, notificationBuilder.build());
     }
+
+    //button to use as updater for now
+    public void notificationTest(View view) {
+        Button testButton = findViewById(R.id.btNotification);
+        TextView tvDevice_ID = findViewById(R.id.tvDevice_ID);
+        TextView tvUser_name = findViewById(R.id.tvUser_name);
+        TextView tvCoordinates = findViewById(R.id.tvCoordinates);
+        TextView tvOn_Feet_Status = findViewById(R.id.tvOn_Feet_Status);
+
+        getData(testButton);
+    }
+
 }

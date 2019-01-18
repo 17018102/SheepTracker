@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SE6 SchaapApp</string>
+    <string name="app_name">S.H.E.E.P Beta V0.1</string>
     <string name="title_activity_maps">Map</string>
     <string name="default_notification_channel_id">"1873"</string>
 </resources>

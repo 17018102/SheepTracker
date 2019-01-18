@@ -24,10 +24,10 @@ public class UserAreaActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_area);
 
-        final TextView tvName = (TextView) findViewById(R.id.tvName);
-        final TextView tvWelcomeMessage = (TextView) findViewById(R.id.tvWelcomeMessage);
-        final TextView tvUserInfo = (TextView) findViewById(R.id.tvUserInfo);
-        final Button btDeviceOverview = (Button) findViewById(R.id.bt_DeviceOverview);
+        final TextView tvName = findViewById(R.id.tvName);
+        final TextView tvWelcomeMessage = findViewById(R.id.tvWelcomeMessage);
+        final TextView tvUserInfo = findViewById(R.id.tvUserInfo);
+        final Button btDeviceOverview = findViewById(R.id.bt_DeviceOverview);
 
         final Intent intent = getIntent();
         String name = intent.getStringExtra("name");
@@ -35,7 +35,7 @@ public class UserAreaActivity extends AppCompatActivity {
 
         String message = name + " , welcome to your user area";
         tvWelcomeMessage.setText(message);
-        tvName.setText(name);
+        tvName.setText("Current user: " + name);
         tvUserInfo.setText(userInformation);
 
         btDeviceOverview.setOnClickListener(new View.OnClickListener() {
@@ -52,10 +52,8 @@ public class UserAreaActivity extends AppCompatActivity {
                             //Check if data was successfully retrieved
                             if (success) {
                                 boolean on_feet_status = jsonResponse.getBoolean("on_feet_status");
-
                                 int device_id = Integer.parseInt(jsonResponse.getString("device_id"));
                                 int device_user_id = Integer.parseInt(jsonResponse.getString("device_user_id"));
-
                                 String coordinates = jsonResponse.getString("location");
                                 String user_name = jsonResponse.getString("user_name");
 
@@ -69,7 +67,6 @@ public class UserAreaActivity extends AppCompatActivity {
 
                                 UserAreaActivity.this.startActivity(NewAcvitity);
                             } else {
-                                //Shows the user a message telling them their log in attempt failed and allows them to retry
                                 AlertDialog.Builder builder = new AlertDialog.Builder(UserAreaActivity.this);
                                 builder.setMessage("Device data couldn't be retrieved")
                                         .setNegativeButton("OK", null)
