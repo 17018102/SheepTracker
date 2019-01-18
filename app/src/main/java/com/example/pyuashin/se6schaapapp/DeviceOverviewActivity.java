@@ -31,9 +31,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
 
+import java.util.StringTokenizer;
+
 public class DeviceOverviewActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final int uniqueID = 1738;
+    private String coordinates;
     private boolean mLocationPermissionGranted = false;
     private MapView mMapView;
     private static final String MAPVIEW_BUNDLE_KEY = "MapViewBundleKey";
@@ -54,7 +57,7 @@ public class DeviceOverviewActivity extends AppCompatActivity implements OnMapRe
         boolean on_feet_status = getIntent().getExtras().getBoolean("on_feet_status");
         int device_id = getIntent().getExtras().getInt("device_id");
         int device_user_id = getIntent().getExtras().getInt("device_user_id");
-        String coordinates = getIntent().getExtras().getString("coordinates");
+        coordinates = getIntent().getExtras().getString("coordinates");
         String user_name = getIntent().getExtras().getString("user_name");
 
         tvDevice_ID.setText("Current device ID: " + device_id);
@@ -101,7 +104,7 @@ public class DeviceOverviewActivity extends AppCompatActivity implements OnMapRe
                                 boolean on_feet_status = jsonResponse.getBoolean("on_feet_status");
                                 int device_id = Integer.parseInt(jsonResponse.getString("device_id"));
                                 int device_user_id = Integer.parseInt(jsonResponse.getString("device_user_id"));
-                                String coordinates = jsonResponse.getString("location");
+                                coordinates = jsonResponse.getString("location");
                                 String user_name = jsonResponse.getString("user_name");
 
                                 onUpdate(device_id, user_name, coordinates, on_feet_status, device_user_id);
@@ -198,10 +201,6 @@ public class DeviceOverviewActivity extends AppCompatActivity implements OnMapRe
         getData(testButton);
     }
 
-    public void btLocationTest(View view) {
-
-    }
-
     //Google maps things
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -212,7 +211,6 @@ public class DeviceOverviewActivity extends AppCompatActivity implements OnMapRe
             mapViewBundle = new Bundle();
             outState.putBundle(MAPVIEW_BUNDLE_KEY, mapViewBundle);
         }
-
         mMapView.onSaveInstanceState(mapViewBundle);
     }
 
@@ -236,7 +234,10 @@ public class DeviceOverviewActivity extends AppCompatActivity implements OnMapRe
 
     @Override
     public void onMapReady(GoogleMap map) {
-        map.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+        StringTokenizer tokens = new StringTokenizer(coordinates, ",");
+        double first = Double.parseDouble(tokens.nextToken());
+        double second = Double.parseDouble(tokens.nextToken());
+        map.addMarker(new MarkerOptions().position(new LatLng(first, second)).title("Marker"));
     }
 
     @Override
