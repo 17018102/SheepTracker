@@ -21,14 +21,22 @@ import android.widget.Toast;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
 
-public class DeviceOverviewActivity extends AppCompatActivity {
+public class DeviceOverviewActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final int uniqueID = 1738;
+    private boolean mLocationPermissionGranted = false;
+    private MapView mMapView;
+    private static final String MAPVIEW_BUNDLE_KEY = "MapViewBundleKey";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +48,8 @@ public class DeviceOverviewActivity extends AppCompatActivity {
         final TextView tvCoordinates = findViewById(R.id.tvCoordinates);
         final TextView tvOn_Feet_Status = findViewById(R.id.tvOn_Feet_Status);
         Button testButton = findViewById(R.id.btNotification);
+
+        mMapView = findViewById(R.id.device_list_map);
 
         boolean on_feet_status = getIntent().getExtras().getBoolean("on_feet_status");
         int device_id = getIntent().getExtras().getInt("device_id");
@@ -56,6 +66,20 @@ public class DeviceOverviewActivity extends AppCompatActivity {
         }else{
             tvOn_Feet_Status.setText("Het schaap ligt op zijn rug");
         }
+
+        //google maps part start
+        // *** IMPORTANT ***
+        // MapView requires that the Bundle you pass contain _ONLY_ MapView SDK
+        // objects or sub-Bundles.
+        Bundle mapViewBundle = null;
+        if (savedInstanceState != null) {
+            mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY);
+        }
+
+        mMapView.onCreate(mapViewBundle);
+        mMapView.getMapAsync((OnMapReadyCallback) this);
+        //google maps part end
+
         getData(testButton);
     }
 
@@ -174,4 +198,62 @@ public class DeviceOverviewActivity extends AppCompatActivity {
         getData(testButton);
     }
 
+    public void btLocationTest(View view) {
+
+    }
+
+    //Google maps things
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        Bundle mapViewBundle = outState.getBundle(MAPVIEW_BUNDLE_KEY);
+        if (mapViewBundle == null) {
+            mapViewBundle = new Bundle();
+            outState.putBundle(MAPVIEW_BUNDLE_KEY, mapViewBundle);
+        }
+
+        mMapView.onSaveInstanceState(mapViewBundle);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mMapView.onResume();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mMapView.onStart();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mMapView.onStop();
+    }
+
+    @Override
+    public void onMapReady(GoogleMap map) {
+        map.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+    }
+
+    @Override
+    public void onPause() {
+        mMapView.onPause();
+        super.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
+        mMapView.onDestroy();
+        super.onDestroy();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mMapView.onLowMemory();
+    }
 }
