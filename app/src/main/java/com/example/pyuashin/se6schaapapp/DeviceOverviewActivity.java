@@ -13,6 +13,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -21,25 +22,34 @@ import android.widget.Toast;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
 
+import java.lang.reflect.Array;
 import java.util.StringTokenizer;
 
 public class DeviceOverviewActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final int uniqueID = 1738;
     private String coordinates;
-    private boolean mLocationPermissionGranted = false;
     private MapView mMapView;
+    private MarkerOptions testMarker;
+    private Marker sheepLocation;
+    private GoogleMap mMap;
     private static final String MAPVIEW_BUNDLE_KEY = "MapViewBundleKey";
+
+    public DeviceOverviewActivity() {
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +60,6 @@ public class DeviceOverviewActivity extends AppCompatActivity implements OnMapRe
         final TextView tvUser_name = findViewById(R.id.tvUser_name);
         final TextView tvCoordinates = findViewById(R.id.tvCoordinates);
         final TextView tvOn_Feet_Status = findViewById(R.id.tvOn_Feet_Status);
-        Button testButton = findViewById(R.id.btNotification);
 
         mMapView = findViewById(R.id.device_list_map);
 
@@ -80,10 +89,8 @@ public class DeviceOverviewActivity extends AppCompatActivity implements OnMapRe
         }
 
         mMapView.onCreate(mapViewBundle);
-        mMapView.getMapAsync((OnMapReadyCallback) this);
+        mMapView.getMapAsync(this);
         //google maps part end
-
-        getData(testButton);
     }
 
     //Fetches data from the database and calls the update method
@@ -128,7 +135,7 @@ public class DeviceOverviewActivity extends AppCompatActivity implements OnMapRe
         });
     }
 
-    //Updates the labels to their corresponding values and sends a notifcation if required
+    //Updates the labels to their corresponding values and sends a notification if required
     //(This was supposed updated automatically based on database changes but couldn't figure out how to make it work)
     private void onUpdate(int deviceID, String user_name, String coordinates, boolean on_feet_status, int device_user_id){
         TextView tvDevice_ID = findViewById(R.id.tvDevice_ID);
@@ -190,15 +197,38 @@ public class DeviceOverviewActivity extends AppCompatActivity implements OnMapRe
         nm.notify(uniqueID, notificationBuilder.build());
     }
 
-    //button to use as updater for now
-    public void notificationTest(View view) {
-        Button testButton = findViewById(R.id.btNotification);
-        TextView tvDevice_ID = findViewById(R.id.tvDevice_ID);
-        TextView tvUser_name = findViewById(R.id.tvUser_name);
-        TextView tvCoordinates = findViewById(R.id.tvCoordinates);
-        TextView tvOn_Feet_Status = findViewById(R.id.tvOn_Feet_Status);
+    //updates the current position of a marker
+    public void updateMarker(){
+        StringTokenizer tokens = new StringTokenizer(coordinates, ",");
+        double first = Double.parseDouble(tokens.nextToken());
+        double second = Double.parseDouble(tokens.nextToken());
+        LatLng ll = new LatLng(first, second);
 
+        sheepLocation.setPosition(new LatLng(first, second));
+
+        CameraUpdate update = CameraUpdateFactory.newLatLngZoom(ll, 15);
+        mMap.moveCamera(update);
+    }
+
+    //removes a marker from the map
+    public void removeMarkers(){
+        if(sheepLocation != null){
+            sheepLocation.remove();
+            Log.d("myTag", "marker was removed");
+            String message = "marker was removed";
+            Toast.makeText(getBaseContext(), message, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    //button to use as updater for now
+    public void updateData(View view) {
+        Button testButton = findViewById(R.id.btNotification);
         getData(testButton);
+    }
+
+    //button to use as updater for now
+    public void locationUpdater(View view) {
+        updateMarker();
     }
 
     //Google maps things
@@ -233,11 +263,20 @@ public class DeviceOverviewActivity extends AppCompatActivity implements OnMapRe
     }
 
     @Override
+    //Gets called when map is ready
     public void onMapReady(GoogleMap map) {
+        this.mMap = map;
+
         StringTokenizer tokens = new StringTokenizer(coordinates, ",");
         double first = Double.parseDouble(tokens.nextToken());
         double second = Double.parseDouble(tokens.nextToken());
-        map.addMarker(new MarkerOptions().position(new LatLng(first, second)).title("Marker"));
+        LatLng ll = new LatLng(first, second);
+
+        testMarker = new MarkerOptions().position(new LatLng(first, second));
+        sheepLocation = map.addMarker(testMarker);
+
+        CameraUpdate update = CameraUpdateFactory.newLatLngZoom(ll, 15);
+        mMap.moveCamera(update);
     }
 
     @Override
@@ -257,4 +296,5 @@ public class DeviceOverviewActivity extends AppCompatActivity implements OnMapRe
         super.onLowMemory();
         mMapView.onLowMemory();
     }
+
 }
