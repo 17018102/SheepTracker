@@ -115,6 +115,8 @@ public class DeviceOverviewActivity extends AppCompatActivity implements OnMapRe
                                 String user_name = jsonResponse.getString("user_name");
 
                                 onUpdate(device_id, user_name, coordinates, on_feet_status, device_user_id);
+                                updateMarker();
+
                             } else {
                                 //Shows the user a message telling them their log in attempt failed and allows them to retry
                                 AlertDialog.Builder builder = new AlertDialog.Builder(DeviceOverviewActivity.this);
@@ -226,11 +228,6 @@ public class DeviceOverviewActivity extends AppCompatActivity implements OnMapRe
         getData(testButton);
     }
 
-    //button to use as updater for now
-    public void locationUpdater(View view) {
-        updateMarker();
-    }
-
     //Google maps things
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -296,5 +293,4 @@ public class DeviceOverviewActivity extends AppCompatActivity implements OnMapRe
         super.onLowMemory();
         mMapView.onLowMemory();
     }
-
 }
